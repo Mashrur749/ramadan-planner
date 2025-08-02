@@ -6,19 +6,16 @@ import {
   BookOpen,
   Heart,
   CheckCircle,
-  Calendar,
   Moon,
   Star,
-  Bell,
-  Flame,
-  Trophy,
-  Users,
+  // Bell,
+  // Flame,
+  // Users,
   Gift,
   Zap,
-  Clock,
-  Plus,
-  Send,
-  X,
+  // Plus,
+  // Send,
+  // X,
 } from "lucide-react";
 
 // TypeScript Interfaces
@@ -81,22 +78,22 @@ interface Achievement {
   target: number;
 }
 
-interface FamilyMember {
-  id: string;
-  name: string;
-  currentDay: number;
-  streak: number;
-  lastActive: Date;
-}
+// interface FamilyMember {
+//   id: string;
+//   name: string;
+//   currentDay: number;
+//   streak: number;
+//   lastActive: Date;
+// }
 
-interface Notification {
-  id: string;
-  type: "prayer" | "deed" | "social" | "achievement" | "laylat";
-  title: string;
-  message: string;
-  timestamp: Date;
-  read: boolean;
-}
+// interface Notification {
+//   id: string;
+//   type: "prayer" | "deed" | "social" | "achievement" | "laylat";
+//   title: string;
+//   message: string;
+//   timestamp: Date;
+//   read: boolean;
+// }
 
 interface SurpriseContent {
   type: "hadith" | "name" | "art" | "dua";
@@ -272,23 +269,175 @@ const RamadanPlannerApp: React.FC = () => {
   const [userName, setUserName] = useState<string>("");
   const [streak, setStreak] = useState<number>(0);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [showNotifications, setShowNotifications] = useState<boolean>(false);
+  // const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  // const [notifications, setNotifications] = useState<Notification[]>([]);
+  // const [showNotifications, setShowNotifications] = useState<boolean>(false);
   const [todaysSurprise, setTodaysSurprise] = useState<SurpriseContent | null>(
     null
   );
   const [showAchievement, setShowAchievement] = useState<Achievement | null>(
     null
   );
-  const [inviteEmail, setInviteEmail] = useState<string>("");
-  const [showFamilyInvite, setShowFamilyInvite] = useState<boolean>(false);
+  // const [inviteEmail, setInviteEmail] = useState<string>("");
+  // const [showFamilyInvite, setShowFamilyInvite] = useState<boolean>(false);
   const [surpriseData, setSurpriseData] = useState<{
     lastShown: string;
     dailyCount: number;
     totalShown: number;
   }>({ lastShown: "", dailyCount: 0, totalShown: 0 });
-  const [showMobileMenu, setShowMobileMenu] = useState<boolean>(false);
+  // const [showMobileMenu, setShowMobileMenu] = useState<boolean>(false);
+  const updateStreak = React.useCallback(() => {
+    // const today = new Date().toDateString();
+    // const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString();
+
+    let currentStreak = 0;
+    for (let i = currentDay; i >= 1; i--) {
+      if (progress[i]?.completedAt) {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+    setStreak(currentStreak);
+  }, [currentDay, progress]);
+
+  const canShowSurprise = React.useCallback((): boolean => {
+    const today = new Date().toDateString();
+    const { lastShown, dailyCount } = surpriseData;
+
+    // Reset daily count if it's a new day
+    if (lastShown !== today) {
+      setSurpriseData((prev) => ({
+        ...prev,
+        lastShown: today,
+        dailyCount: 0,
+      }));
+      return true; // First surprise of the day
+    }
+
+    // Limit to 2 surprises per day maximum
+    return dailyCount < 2;
+  }, [surpriseData]);
+
+  const triggerSurpriseContent = React.useCallback(
+    (trigger: "achievement" | "streak" | "completion" | "special_day") => {
+      if (!canShowSurprise() || todaysSurprise) return;
+
+      let surprisePool = surpriseContent;
+
+      // Different content based on trigger
+      switch (trigger) {
+        case "achievement":
+          // Show special content for achievements
+          surprisePool = surpriseContent.filter(
+            (s) => s.type === "hadith" || s.type === "name"
+          );
+          break;
+        case "streak":
+          // Show motivational content for streaks
+          surprisePool = surpriseContent.filter(
+            (s) => s.type === "dua" || s.type === "hadith"
+          );
+          break;
+        case "completion":
+          // Show any content for daily completion
+          break;
+        case "special_day":
+          // Show special content for odd nights
+          surprisePool = surpriseContent.filter((s) => s.type === "dua");
+          break;
+      }
+
+      if (surprisePool.length === 0) return;
+
+      const randomContent =
+        surprisePool[Math.floor(Math.random() * surprisePool.length)];
+      setTodaysSurprise(randomContent);
+
+      // Update surprise data
+      setSurpriseData((prev) => ({
+        ...prev,
+        dailyCount: prev.dailyCount + 1,
+        totalShown: prev.totalShown + 1,
+        lastShown: new Date().toDateString(),
+      }));
+    },
+    [canShowSurprise, todaysSurprise, setTodaysSurprise, setSurpriseData]
+  );
+
+  const checkAchievements = React.useCallback(() => {
+    const updatedAchievements = achievements.map((achievement) => {
+      let newProgress = achievement.progress;
+
+      switch (achievement.id) {
+        case "first_week":
+          newProgress = streak;
+          break;
+        case "prayer_master":
+          newProgress = Object.values(progress).filter(
+            (day) =>
+              day.prayers &&
+              Object.values(day.prayers).filter(
+                (prayer) =>
+                  typeof prayer === "object" &&
+                  prayer !== null &&
+                  "fard" in prayer &&
+                  (prayer as Prayer).fard
+              ).length >= 5
+          ).length;
+          break;
+        case "charity_champion":
+          newProgress = Object.values(progress).filter(
+            (day) => day.checklist?.["GAVE CHARITY"]
+          ).length;
+          break;
+        case "quran_lover":
+          newProgress = Object.values(progress).reduce(
+            (total, day) => total + (day.quran?.recited || 0),
+            0
+          );
+          break;
+        case "night_warrior":
+          newProgress = Object.values(progress).reduce(
+            (total, day) => total + (day.prayers?.qiyam || 0),
+            0
+          );
+          break;
+      }
+
+      const wasUnlocked = achievement.unlocked;
+      const nowUnlocked = newProgress >= achievement.target;
+
+      // Show achievement popup for newly unlocked achievements
+      if (!wasUnlocked && nowUnlocked) {
+        setTimeout(
+          () =>
+            setShowAchievement({
+              ...achievement,
+              progress: newProgress,
+              unlocked: true,
+            }),
+          1000
+        );
+        // Trigger surprise content for major achievements
+        triggerSurpriseContent("achievement");
+      }
+
+      return {
+        ...achievement,
+        progress: newProgress,
+        unlocked: nowUnlocked,
+      };
+    });
+
+    setAchievements(updatedAchievements);
+  }, [achievements, progress, streak, triggerSurpriseContent]);
+
+  const getCurrentDayData = React.useCallback((): RamadanDay => {
+    return (
+      ramadanData.days.find((d) => d.day === currentDay) || ramadanData.days[0]
+    );
+  }, [currentDay]);
 
   // Check for special day surprises when day changes
   useEffect(() => {
@@ -307,7 +456,7 @@ const RamadanPlannerApp: React.FC = () => {
         }, 5000);
       }
     }
-  }, [currentDay]);
+  }, [currentDay, getCurrentDayData, triggerSurpriseContent]);
 
   // Initialize achievements
   useEffect(() => {
@@ -360,25 +509,25 @@ const RamadanPlannerApp: React.FC = () => {
     ]);
 
     // Simulate family members
-    setFamilyMembers([
-      {
-        id: "1",
-        name: "Ahmed (Brother)",
-        currentDay: 8,
-        streak: 8,
-        lastActive: new Date(),
-      },
-      {
-        id: "2",
-        name: "Fatima (Sister)",
-        currentDay: 7,
-        streak: 6,
-        lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      },
-    ]);
+    // setFamilyMembers([
+    //   {
+    //     id: "1",
+    //     name: "Ahmed (Brother)",
+    //     currentDay: 8,
+    //     streak: 8,
+    //     lastActive: new Date(),
+    //   },
+    //   {
+    //     id: "2",
+    //     name: "Fatima (Sister)",
+    //     currentDay: 7,
+    //     streak: 6,
+    //     lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    //   },
+    // ]);
 
     // Generate initial notifications
-    generateNotifications();
+    // generateNotifications();
   }, []);
 
   // Load and save progress
@@ -416,191 +565,57 @@ const RamadanPlannerApp: React.FC = () => {
 
     updateStreak();
     checkAchievements();
-  }, [progress, userName, surpriseData]);
+  }, [
+    progress,
+    userName,
+    surpriseData,
+    streak,
+    updateStreak,
+    checkAchievements,
+  ]);
 
-  const generateNotifications = () => {
-    const newNotifications: Notification[] = [
-      {
-        id: "1",
-        type: "prayer",
-        title: "Maghrib Time",
-        message: "Perfect time to break your fast with dates! 🌴",
-        timestamp: new Date(),
-        read: false,
-      },
-      {
-        id: "2",
-        type: "social",
-        title: "Family Update",
-        message: "Ahmed completed Day 8! Send him encouragement? 👨‍👩‍👧‍👦",
-        timestamp: new Date(Date.now() - 30 * 60 * 1000),
-        read: false,
-      },
-    ];
+  // const generateNotifications = () => {
+  //   const newNotifications: Notification[] = [
+  //     {
+  //       id: "1",
+  //       type: "prayer",
+  //       title: "Maghrib Time",
+  //       message: "Perfect time to break your fast with dates! 🌴",
+  //       timestamp: new Date(),
+  //       read: false,
+  //     },
+  //     {
+  //       id: "2",
+  //       type: "social",
+  //       title: "Family Update",
+  //       message: "Ahmed completed Day 8! Send him encouragement? 👨‍👩‍👧‍👦",
+  //       timestamp: new Date(Date.now() - 30 * 60 * 1000),
+  //       read: false,
+  //     },
+  //   ];
 
-    if (getCurrentDayData().specialNight) {
-      newNotifications.push({
-        id: "3",
-        type: "laylat",
-        title: "Special Night!",
-        message:
-          "Tonight could be Laylat al-Qadr! Perfect time for extra worship ⭐",
-        timestamp: new Date(),
-        read: false,
-      });
-    }
+  //   if (getCurrentDayData().specialNight) {
+  //     newNotifications.push({
+  //       id: "3",
+  //       type: "laylat",
+  //       title: "Special Night!",
+  //       message:
+  //         "Tonight could be Laylat al-Qadr! Perfect time for extra worship ⭐",
+  //       timestamp: new Date(),
+  //       read: false,
+  //     });
+  //   }
 
-    setNotifications(newNotifications);
-  };
-
-  const updateStreak = () => {
-    const today = new Date().toDateString();
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString();
-
-    let currentStreak = 0;
-    for (let i = currentDay; i >= 1; i--) {
-      if (progress[i]?.completedAt) {
-        currentStreak++;
-      } else {
-        break;
-      }
-    }
-    setStreak(currentStreak);
-  };
-
-  const checkAchievements = () => {
-    const updatedAchievements = achievements.map((achievement) => {
-      let newProgress = achievement.progress;
-
-      switch (achievement.id) {
-        case "first_week":
-          newProgress = streak;
-          break;
-        case "prayer_master":
-          newProgress = Object.values(progress).filter(
-            (day) =>
-              day.prayers &&
-              Object.values(day.prayers).filter(
-                (prayer) => typeof prayer === "object" && prayer.fard
-              ).length >= 5
-          ).length;
-          break;
-        case "charity_champion":
-          newProgress = Object.values(progress).filter(
-            (day) => day.checklist?.["GAVE CHARITY"]
-          ).length;
-          break;
-        case "quran_lover":
-          newProgress = Object.values(progress).reduce(
-            (total, day) => total + (day.quran?.recited || 0),
-            0
-          );
-          break;
-        case "night_warrior":
-          newProgress = Object.values(progress).reduce(
-            (total, day) => total + (day.prayers?.qiyam || 0),
-            0
-          );
-          break;
-      }
-
-      const wasUnlocked = achievement.unlocked;
-      const nowUnlocked = newProgress >= achievement.target;
-
-      // Show achievement popup for newly unlocked achievements
-      if (!wasUnlocked && nowUnlocked) {
-        setTimeout(
-          () =>
-            setShowAchievement({
-              ...achievement,
-              progress: newProgress,
-              unlocked: true,
-            }),
-          1000
-        );
-        // Trigger surprise content for major achievements
-        triggerSurpriseContent("achievement");
-      }
-
-      return {
-        ...achievement,
-        progress: newProgress,
-        unlocked: nowUnlocked,
-      };
-    });
-
-    setAchievements(updatedAchievements);
-  };
+  //   setNotifications(newNotifications);
+  // };
 
   // Smart surprise content logic
-  const canShowSurprise = (): boolean => {
-    const today = new Date().toDateString();
-    const { lastShown, dailyCount } = surpriseData;
-
-    // Reset daily count if it's a new day
-    if (lastShown !== today) {
-      setSurpriseData((prev) => ({
-        ...prev,
-        lastShown: today,
-        dailyCount: 0,
-      }));
-      return true; // First surprise of the day
-    }
-
-    // Limit to 2 surprises per day maximum
-    return dailyCount < 2;
-  };
-
-  const triggerSurpriseContent = (
-    trigger: "achievement" | "streak" | "completion" | "special_day"
-  ) => {
-    if (!canShowSurprise() || todaysSurprise) return;
-
-    let surprisePool = surpriseContent;
-
-    // Different content based on trigger
-    switch (trigger) {
-      case "achievement":
-        // Show special content for achievements
-        surprisePool = surpriseContent.filter(
-          (s) => s.type === "hadith" || s.type === "name"
-        );
-        break;
-      case "streak":
-        // Show motivational content for streaks
-        surprisePool = surpriseContent.filter(
-          (s) => s.type === "dua" || s.type === "hadith"
-        );
-        break;
-      case "completion":
-        // Show any content for daily completion
-        break;
-      case "special_day":
-        // Show special content for odd nights
-        surprisePool = surpriseContent.filter((s) => s.type === "dua");
-        break;
-    }
-
-    if (surprisePool.length === 0) return;
-
-    const randomContent =
-      surprisePool[Math.floor(Math.random() * surprisePool.length)];
-    setTodaysSurprise(randomContent);
-
-    // Update surprise data
-    setSurpriseData((prev) => ({
-      ...prev,
-      dailyCount: prev.dailyCount + 1,
-      totalShown: prev.totalShown + 1,
-      lastShown: new Date().toDateString(),
-    }));
-  };
 
   const updateProgress = (
     day: number,
     category: keyof DayProgress,
     item: string | null,
-    value: any
+    value: unknown
   ): void => {
     setProgress((prev) => {
       const oldDayProgress = prev[day] || {};
@@ -610,7 +625,7 @@ const RamadanPlannerApp: React.FC = () => {
           ...prev[day],
           [category]: item
             ? {
-                ...(prev[day]?.[category] as Record<string, any>),
+                ...(prev[day]?.[category] as Record<string, unknown>),
                 [item]: value,
               }
             : value,
@@ -634,7 +649,9 @@ const RamadanPlannerApp: React.FC = () => {
         category === "prayers" &&
         item &&
         typeof value === "object" &&
-        value.fard
+        value !== null &&
+        "fard" in value &&
+        (value as Prayer).fard
       ) {
         // All 5 prayers completed for the day
         const prayerCount = Object.values(
@@ -708,12 +725,6 @@ const RamadanPlannerApp: React.FC = () => {
     return progress[day] || {};
   };
 
-  const getCurrentDayData = (): RamadanDay => {
-    return (
-      ramadanData.days.find((d) => d.day === currentDay) || ramadanData.days[0]
-    );
-  };
-
   const quickAction = (action: string) => {
     const day = currentDay;
     switch (action) {
@@ -732,100 +743,100 @@ const RamadanPlannerApp: React.FC = () => {
     }
   };
 
-  const sendFamilyInvite = () => {
-    if (inviteEmail) {
-      // Simulate sending invite
-      setNotifications((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          type: "social",
-          title: "Invitation Sent",
-          message: `Invitation sent to ${inviteEmail}! 📧`,
-          timestamp: new Date(),
-          read: false,
-        },
-      ]);
-      setInviteEmail("");
-      setShowFamilyInvite(false);
-    }
-  };
+  // const sendFamilyInvite = () => {
+  //   if (inviteEmail) {
+  //     // Simulate sending invite
+  //     setNotifications((prev) => [
+  //       ...prev,
+  //       {
+  //         id: Date.now().toString(),
+  //         type: "social",
+  //         title: "Invitation Sent",
+  //         message: `Invitation sent to ${inviteEmail}! 📧`,
+  //         timestamp: new Date(),
+  //         read: false,
+  //       },
+  //     ]);
+  //     setInviteEmail("");
+  //     setShowFamilyInvite(false);
+  //   }
+  // };
 
   // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setShowNotifications(false);
-      setShowMobileMenu(false);
-    };
+  // useEffect(() => {
+  //   const handleClickOutside = () => {
+  //     setShowNotifications(false);
+  //     // setShowMobileMenu(false);
+  //   };
 
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+  //   document.addEventListener("click", handleClickOutside);
+  //   return () => document.removeEventListener("click", handleClickOutside);
+  // }, []);
 
   // Notification Bell Component - Mobile Optimized
-  const NotificationBell = () => {
-    const unreadCount = notifications.filter((n) => !n.read).length;
+  // const NotificationBell = () => {
+  //   const unreadCount = notifications.filter((n) => !n.read).length;
 
-    return (
-      <div className="relative">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowNotifications(!showNotifications);
-          }}
-          className="p-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 relative min-h-[44px] min-w-[44px] flex items-center justify-center"
-        >
-          <Bell size={20} />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              {unreadCount}
-            </span>
-          )}
-        </button>
+  //   return (
+  //     <div className="relative">
+  //       <button
+  //         onClick={(e) => {
+  //           e.stopPropagation();
+  //           setShowNotifications(!showNotifications);
+  //         }}
+  //         className="p-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 relative min-h-[44px] min-w-[44px] flex items-center justify-center"
+  //       >
+  //         <Bell size={20} />
+  //         {unreadCount > 0 && (
+  //           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+  //             {unreadCount}
+  //           </span>
+  //         )}
+  //       </button>
 
-        {showNotifications && (
-          <div className="absolute right-0 top-12 w-80 max-w-[90vw] bg-white rounded-lg shadow-xl border z-50">
-            <div className="p-4 border-b">
-              <h3 className="font-semibold text-gray-800">Notifications</h3>
-            </div>
-            <div className="max-h-64 overflow-y-auto">
-              {notifications.length === 0 ? (
-                <p className="p-4 text-gray-500 text-center">
-                  No new notifications
-                </p>
-              ) : (
-                notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-4 border-b hover:bg-gray-50 ${
-                      !notification.read ? "bg-blue-50" : ""
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm">
-                          {notification.title}
-                        </h4>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {notification.timestamp.toLocaleTimeString()}
-                        </p>
-                      </div>
-                      {!notification.read && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
+  //       {showNotifications && (
+  //         <div className="absolute right-0 top-12 w-80 max-w-[90vw] bg-white rounded-lg shadow-xl border z-50">
+  //           <div className="p-4 border-b">
+  //             <h3 className="font-semibold text-gray-800">Notifications</h3>
+  //           </div>
+  //           <div className="max-h-64 overflow-y-auto">
+  //             {notifications.length === 0 ? (
+  //               <p className="p-4 text-gray-500 text-center">
+  //                 No new notifications
+  //               </p>
+  //             ) : (
+  //               notifications.map((notification) => (
+  //                 <div
+  //                   key={notification.id}
+  //                   className={`p-4 border-b hover:bg-gray-50 ${
+  //                     !notification.read ? "bg-blue-50" : ""
+  //                   }`}
+  //                 >
+  //                   <div className="flex justify-between items-start">
+  //                     <div className="flex-1">
+  //                       <h4 className="font-medium text-sm">
+  //                         {notification.title}
+  //                       </h4>
+  //                       <p className="text-sm text-gray-600 mt-1">
+  //                         {notification.message}
+  //                       </p>
+  //                       <p className="text-xs text-gray-400 mt-1">
+  //                         {notification.timestamp.toLocaleTimeString()}
+  //                       </p>
+  //                     </div>
+  //                     {!notification.read && (
+  //                       <div className="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
+  //                     )}
+  //                   </div>
+  //                 </div>
+  //               ))
+  //             )}
+  //           </div>
+  //         </div>
+  //       )}
+  //     </div>
+  //   );
+  // };
 
   // Quick Actions Component - Mobile Optimized
   const QuickActions = () => (
@@ -871,22 +882,22 @@ const RamadanPlannerApp: React.FC = () => {
   );
 
   // Streak Display - Mobile Optimized
-  const StreakDisplay = () => (
-    <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
-      <div className="flex items-center space-x-2 bg-orange-100 px-3 py-1 rounded-full">
-        <Flame className="text-orange-500" size={16} />
-        <span className="font-bold text-orange-700 text-sm">
-          {streak} Day Streak
-        </span>
-      </div>
-      <div className="text-center sm:text-right">
-        <div className="text-xs">Progress</div>
-        <div className="text-sm font-bold">
-          {Object.keys(progress).length}/30 days
-        </div>
-      </div>
-    </div>
-  );
+  // const StreakDisplay = () => (
+  //   <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+  //     <div className="flex items-center space-x-2 bg-orange-100 px-3 py-1 rounded-full">
+  //       <Flame className="text-orange-500" size={16} />
+  //       <span className="font-bold text-orange-700 text-sm">
+  //         {streak} Day Streak
+  //       </span>
+  //     </div>
+  //     <div className="text-center sm:text-right">
+  //       <div className="text-xs">Progress</div>
+  //       <div className="text-sm font-bold">
+  //         {Object.keys(progress).length}/30 days
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 
   // Achievement Popup - Mobile Optimized
   const AchievementPopup = () =>
@@ -934,7 +945,7 @@ const RamadanPlannerApp: React.FC = () => {
                   Wisdom of the Prophet ﷺ
                 </h4>
                 <p className="italic text-gray-700 mb-2 text-sm sm:text-base">
-                  "{todaysSurprise.content}"
+                  &quot;{todaysSurprise.content}&quot;
                 </p>
                 <p className="text-sm text-gray-500">
                   - {todaysSurprise.source}
@@ -963,7 +974,7 @@ const RamadanPlannerApp: React.FC = () => {
                 </p>
                 {todaysSurprise.source && (
                   <p className="text-sm text-gray-600 italic">
-                    "{todaysSurprise.source}"
+                    &quot;{todaysSurprise.source}&quot;
                   </p>
                 )}
               </div>
@@ -981,70 +992,70 @@ const RamadanPlannerApp: React.FC = () => {
     );
 
   // Family Circle Component - Mobile Optimized
-  const FamilyCircle = () => (
-    <div className="bg-white rounded-lg p-4 shadow-md">
-      <div className="flex justify-between items-center mb-3">
-        <h3 className="text-lg font-semibold text-blue-800 flex items-center">
-          <Users className="mr-2" size={20} />
-          Family Circle
-        </h3>
-        <button
-          onClick={() => setShowFamilyInvite(true)}
-          className="p-2 text-blue-600 hover:bg-blue-50 rounded min-h-[44px] min-w-[44px] flex items-center justify-center"
-        >
-          <Plus size={16} />
-        </button>
-      </div>
+  // const FamilyCircle = () => (
+  //   <div className="bg-white rounded-lg p-4 shadow-md">
+  //     <div className="flex justify-between items-center mb-3">
+  //       <h3 className="text-lg font-semibold text-blue-800 flex items-center">
+  //         <Users className="mr-2" size={20} />
+  //         Family Circle
+  //       </h3>
+  //       <button
+  //         onClick={() => setShowFamilyInvite(true)}
+  //         className="p-2 text-blue-600 hover:bg-blue-50 rounded min-h-[44px] min-w-[44px] flex items-center justify-center"
+  //       >
+  //         <Plus size={16} />
+  //       </button>
+  //     </div>
 
-      <div className="space-y-2">
-        {familyMembers.map((member) => (
-          <div
-            key={member.id}
-            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-          >
-            <div>
-              <div className="font-medium text-sm">{member.name}</div>
-              <div className="text-xs text-gray-500">
-                Day {member.currentDay} • {member.streak} day streak
-              </div>
-            </div>
-            <button className="text-blue-600 hover:bg-blue-100 p-2 rounded min-h-[44px] min-w-[44px] flex items-center justify-center">
-              <Send size={14} />
-            </button>
-          </div>
-        ))}
-      </div>
+  //     <div className="space-y-2">
+  //       {familyMembers.map((member) => (
+  //         <div
+  //           key={member.id}
+  //           className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+  //         >
+  //           <div>
+  //             <div className="font-medium text-sm">{member.name}</div>
+  //             <div className="text-xs text-gray-500">
+  //               Day {member.currentDay} • {member.streak} day streak
+  //             </div>
+  //           </div>
+  //           <button className="text-blue-600 hover:bg-blue-100 p-2 rounded min-h-[44px] min-w-[44px] flex items-center justify-center">
+  //             <Send size={14} />
+  //           </button>
+  //         </div>
+  //       ))}
+  //     </div>
 
-      {showFamilyInvite && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Invite Family Member</h3>
-              <button
-                onClick={() => setShowFamilyInvite(false)}
-                className="p-2 hover:bg-gray-100 rounded min-h-[44px] min-w-[44px] flex items-center justify-center"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <input
-              type="email"
-              placeholder="family@email.com"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              className="w-full p-3 border rounded-lg mb-4 text-base"
-            />
-            <button
-              onClick={sendFamilyInvite}
-              className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 min-h-[44px]"
-            >
-              Send Invitation
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  //     {/* {showFamilyInvite && (
+  //       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  //         <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+  //           <div className="flex justify-between items-center mb-4">
+  //             <h3 className="text-lg font-semibold">Invite Family Member</h3>
+  //             <button
+  //               onClick={() => setShowFamilyInvite(false)}
+  //               className="p-2 hover:bg-gray-100 rounded min-h-[44px] min-w-[44px] flex items-center justify-center"
+  //             >
+  //               <X size={20} />
+  //             </button>
+  //           </div>
+  //           <input
+  //             type="email"
+  //             placeholder="family@email.com"
+  //             value={inviteEmail}
+  //             onChange={(e) => setInviteEmail(e.target.value)}
+  //             className="w-full p-3 border rounded-lg mb-4 text-base"
+  //           />
+  //           <button
+  //             onClick={sendFamilyInvite}
+  //             className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 min-h-[44px]"
+  //           >
+  //             Send Invitation
+  //           </button>
+  //         </div>
+  //       </div>
+  //     )} */}
+  //   </div>
+  // );
 
   const dayData = getCurrentDayData();
 
@@ -1127,7 +1138,7 @@ const RamadanPlannerApp: React.FC = () => {
         <div className="bg-white rounded-lg p-4 sm:p-6 shadow-md mb-6">
           <div className="text-center">
             <p className="text-base sm:text-lg italic text-gray-700 mb-2 leading-relaxed">
-              "{dayData.hadith}"
+              &quot;{dayData.hadith}&quot;
             </p>
             <p className="text-sm text-gray-500">{dayData.source}</p>
           </div>
@@ -1271,7 +1282,7 @@ const RamadanPlannerApp: React.FC = () => {
           {/* Dua Section */}
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 shadow-md">
             <h3 className="text-lg font-semibold text-blue-800 mb-3">
-              DU'A OF PROPHET {dayData.dua.prophet}
+              DU&apos;A OF PROPHET {dayData.dua.prophet}
             </h3>
             <div className="space-y-3">
               <div className="text-right">
@@ -1286,7 +1297,7 @@ const RamadanPlannerApp: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  "{dayData.dua.translation}"
+                  &quot;{dayData.dua.translation}&quot;
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
                   {dayData.dua.reference}
@@ -1300,7 +1311,7 @@ const RamadanPlannerApp: React.FC = () => {
         <div className="bg-white rounded-lg p-4 shadow-md">
           <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center">
             <Star className="mr-2" size={20} />
-            TODAY'S GOALS & REFLECTION
+            TODAY&apos;S GOALS & REFLECTION
           </h3>
           <textarea
             placeholder="What are your intentions for today? How did you feel about your spiritual progress?"
