@@ -1060,363 +1060,367 @@ const RamadanPlannerApp: React.FC = () => {
   const dayData = getCurrentDayData();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-green-100 pb-20">
-      {/* Header with notifications - Mobile Optimized */}
-      <div
-        className={`${
-          dayData.specialNight
-            ? "bg-gradient-to-r from-purple-800 to-indigo-700"
-            : "bg-gradient-to-r from-blue-800 to-green-700"
-        } text-white p-4 sm:p-6`}
-      >
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-4">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-              🌙 Ramadan Action Planner
+    <>
+      <div className="min-h-screen bg-gradient-to-b from-blue-100 to-green-100 pb-20">
+        {/* Header with notifications - Mobile Optimized */}
+        <div
+          className={`${
+            dayData.specialNight
+              ? "bg-gradient-to-r from-purple-800 to-indigo-700"
+              : "bg-gradient-to-r from-blue-800 to-green-700"
+          } text-white p-4 sm:p-6`}
+        >
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-4">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+                🌙 Ramadan Action Planner
+                {dayData.specialNight && (
+                  <span className="text-yellow-300"> ⭐</span>
+                )}
+              </h1>
+              <p className="text-blue-100 text-sm sm:text-base">
+                A Daily Planner and Guide for All Ages!
+              </p>
               {dayData.specialNight && (
-                <span className="text-yellow-300"> ⭐</span>
-              )}
-            </h1>
-            <p className="text-blue-100 text-sm sm:text-base">
-              A Daily Planner and Guide for All Ages!
-            </p>
-            {dayData.specialNight && (
-              <div className="mt-2 bg-yellow-500 bg-opacity-20 rounded-lg p-2">
-                <p className="text-yellow-200 text-xs sm:text-sm">
-                  🌟 Tonight could be Laylat al-Qadr! Perfect time for extra
-                  worship
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Header Layout */}
-          <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
-            <button
-              onClick={() => setShowPledge(true)}
-              className="bg-white text-zinc-950 font-bold bg-opacity-20 hover:bg-opacity-30 px-4 py-3 rounded-lg transition-colors min-h-[44px]"
-            >
-              Read Pledge
-            </button>
-
-            <div className="flex items-center justify-center space-x-4">
-              <button
-                onClick={() => setCurrentDay(Math.max(1, currentDay - 1))}
-                disabled={currentDay === 1}
-                className="p-3 rounded-lg bg-white text-zinc-950 bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
-              >
-                <ChevronLeft size={20} />
-              </button>
-
-              <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold">
-                  Day {currentDay}
+                <div className="mt-2 bg-yellow-500 bg-opacity-20 rounded-lg p-2">
+                  <p className="text-yellow-200 text-xs sm:text-sm">
+                    🌟 Tonight could be Laylat al-Qadr! Perfect time for extra
+                    worship
+                  </p>
                 </div>
-                <div className="text-xs sm:text-sm">Ramadan 1446</div>
-              </div>
-
-              <button
-                onClick={() => setCurrentDay(Math.min(30, currentDay + 1))}
-                disabled={currentDay === 30}
-                className="p-3 rounded-lg bg-white text-zinc-950 bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
-              >
-                <ChevronRight size={20} />
-              </button>
+              )}
             </div>
 
-            {/* <div className="flex items-center justify-center space-x-2 sm:space-x-4">
+            {/* Mobile Header Layout */}
+            <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+              <button
+                onClick={() => setShowPledge(true)}
+                className="bg-white text-zinc-950 font-bold bg-opacity-20 hover:bg-opacity-30 px-4 py-3 rounded-lg transition-colors min-h-[44px]"
+              >
+                Read Pledge
+              </button>
+
+              <div className="flex items-center justify-center space-x-4">
+                <button
+                  onClick={() => setCurrentDay(Math.max(1, currentDay - 1))}
+                  disabled={currentDay === 1}
+                  className="p-3 rounded-lg bg-white text-zinc-950 bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+
+                <div className="text-center">
+                  <div className="text-xl sm:text-2xl font-bold">
+                    Day {currentDay}
+                  </div>
+                  <div className="text-xs sm:text-sm">Ramadan 1446</div>
+                </div>
+
+                <button
+                  onClick={() => setCurrentDay(Math.min(30, currentDay + 1))}
+                  disabled={currentDay === 30}
+                  className="p-3 rounded-lg bg-white text-zinc-950 bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+
+              {/* <div className="flex items-center justify-center space-x-2 sm:space-x-4">
               <NotificationBell />
               <StreakDisplay />
             </div> */}
-          </div>
-        </div>
-      </div>
-
-      {/* Daily Content - Mobile Optimized */}
-      <div className="max-w-6xl mx-auto p-4 sm:p-6">
-        {/* Daily Hadith/Quote */}
-        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-md mb-6">
-          <div className="text-center">
-            <p className="text-base sm:text-lg italic text-gray-700 mb-2 leading-relaxed">
-              &quot;{dayData.hadith}&quot;
-            </p>
-            <p className="text-sm text-gray-500">{dayData.source}</p>
+            </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <QuickActions />
-
-        {/* Main Content Grid - Mobile Responsive */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-          {/* Prayer Tracker - Simplified for quick actions */}
-          <div className="bg-white rounded-lg p-4 shadow-md">
-            <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center">
-              <Moon className="mr-2" size={20} />
-              PRAYERS
-            </h3>
-            <div className="space-y-3">
-              {prayers.map((prayer) => (
-                <div
-                  key={prayer.name}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center">
-                    <span className="text-lg mr-2">{prayer.icon}</span>
-                    <span className="text-sm font-medium">{prayer.name}</span>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={
-                      getDayProgress(currentDay).prayers?.[prayer.name]?.fard ||
-                      false
-                    }
-                    onChange={(e) =>
-                      updateProgress(currentDay, "prayers", prayer.name, {
-                        ...getDayProgress(currentDay).prayers?.[prayer.name],
-                        fard: e.target.checked,
-                      })
-                    }
-                    className="w-5 h-5"
-                  />
-                </div>
-              ))}
+        {/* Daily Content - Mobile Optimized */}
+        <div className="max-w-6xl mx-auto p-4 sm:p-6">
+          {/* Daily Hadith/Quote */}
+          <div className="bg-white rounded-lg p-4 sm:p-6 shadow-md mb-6">
+            <div className="text-center">
+              <p className="text-base sm:text-lg italic text-gray-700 mb-2 leading-relaxed">
+                &quot;{dayData.hadith}&quot;
+              </p>
+              <p className="text-sm text-gray-500">{dayData.source}</p>
             </div>
           </div>
 
-          {/* Quran Tracker */}
-          <div className="bg-white rounded-lg p-4 shadow-md">
-            <h3 className="text-lg font-semibold text-green-800 mb-3 flex items-center">
-              <BookOpen className="mr-2" size={20} />
-              QURAN
-            </h3>
-            {/* <div className="text-sm text-blue-600 font-medium mb-3">
-              {dayData.quranReading}
-            </div> */}
-            <div className="space-y-2">
-              <div>
-                <label className="block text-xs font-medium mb-1">
-                  Pages Read
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={getDayProgress(currentDay).quran?.recited || 0}
-                  onChange={(e) =>
-                    updateProgress(
-                      currentDay,
-                      "quran",
-                      "recited",
-                      parseInt(e.target.value) || 0
-                    )
-                  }
-                  className="w-full px-3 py-2 border rounded text-center text-base"
-                />
+          {/* Quick Actions */}
+          <QuickActions />
+
+          {/* Main Content Grid - Mobile Responsive */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+            {/* Prayer Tracker - Simplified for quick actions */}
+            <div className="bg-white rounded-lg p-4 shadow-md">
+              <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center">
+                <Moon className="mr-2" size={20} />
+                PRAYERS
+              </h3>
+              <div className="space-y-3">
+                {prayers.map((prayer) => (
+                  <div
+                    key={prayer.name}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center">
+                      <span className="text-lg mr-2">{prayer.icon}</span>
+                      <span className="text-sm font-medium">{prayer.name}</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={
+                        getDayProgress(currentDay).prayers?.[prayer.name]
+                          ?.fard || false
+                      }
+                      onChange={(e) =>
+                        updateProgress(currentDay, "prayers", prayer.name, {
+                          ...getDayProgress(currentDay).prayers?.[prayer.name],
+                          fard: e.target.checked,
+                        })
+                      }
+                      className="w-5 h-5"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
 
-          {/* Daily Checklist */}
-          <div className="bg-white rounded-lg p-4 shadow-md">
-            <h3 className="text-lg font-semibold text-purple-800 mb-3 flex items-center">
-              <CheckCircle className="mr-2" size={20} />
-              CHECKLIST
-            </h3>
-            <div className="space-y-2">
-              {dailyChecklistItems.map((item, index) => (
-                <label key={index} className="flex items-center text-xs">
+            {/* Quran Tracker */}
+            <div className="bg-white rounded-lg p-4 shadow-md">
+              <h3 className="text-lg font-semibold text-green-800 mb-3 flex items-center">
+                <BookOpen className="mr-2" size={20} />
+                QURAN
+              </h3>
+              {/* <div className="text-sm text-blue-600 font-medium mb-3">
+              {dayData.quranReading}
+            </div> */}
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-xs font-medium mb-1">
+                    Pages Read
+                  </label>
                   <input
-                    type="checkbox"
-                    checked={
-                      getDayProgress(currentDay).checklist?.[item] || false
-                    }
+                    type="number"
+                    min="0"
+                    value={getDayProgress(currentDay).quran?.recited || 0}
                     onChange={(e) =>
                       updateProgress(
                         currentDay,
-                        "checklist",
-                        item,
-                        e.target.checked
+                        "quran",
+                        "recited",
+                        parseInt(e.target.value) || 0
                       )
                     }
-                    className="mr-3 w-4 h-4"
+                    className="w-full px-3 py-2 border rounded text-center text-base"
                   />
-                  <span className="truncate leading-relaxed">{item}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Family Circle */}
-          {/* <FamilyCircle /> */}
-        </div>
-
-        {/* Deed and Dua Section - Mobile Responsive */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
-          {/* Deed of the Day */}
-          <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-4 shadow-md">
-            <h3 className="text-lg font-semibold text-red-800 mb-3 flex items-center">
-              <Heart className="mr-2" size={20} />
-              Deed of the Day
-            </h3>
-            <p className="text-gray-700 mb-3 text-sm sm:text-base leading-relaxed">
-              {dayData.deedOfDay}
-            </p>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={getDayProgress(currentDay).deedCompleted || false}
-                onChange={(e) =>
-                  updateProgress(
-                    currentDay,
-                    "deedCompleted",
-                    null,
-                    e.target.checked
-                  )
-                }
-                className="mr-3 w-4 h-4"
-              />
-              <span className="text-sm font-medium">Completed</span>
-            </label>
-          </div>
-
-          {/* Dua Section */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 shadow-md">
-            <h3 className="text-lg font-semibold text-blue-800 mb-3">
-              DU&apos;A OF PROPHET {dayData.dua.prophet}
-            </h3>
-            <div className="space-y-3">
-              <div className="text-right">
-                <p className="text-base sm:text-lg arabic-text text-blue-900 leading-relaxed">
-                  {dayData.dua.arabic}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs italic text-gray-600 leading-relaxed">
-                  {dayData.dua.transliteration}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  &quot;{dayData.dua.translation}&quot;
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {dayData.dua.reference}
-                </p>
+                </div>
               </div>
             </div>
+
+            {/* Daily Checklist */}
+            <div className="bg-white rounded-lg p-4 shadow-md">
+              <h3 className="text-lg font-semibold text-purple-800 mb-3 flex items-center">
+                <CheckCircle className="mr-2" size={20} />
+                CHECKLIST
+              </h3>
+              <div className="space-y-2">
+                {dailyChecklistItems.map((item, index) => (
+                  <label key={index} className="flex items-center text-xs">
+                    <input
+                      type="checkbox"
+                      checked={
+                        getDayProgress(currentDay).checklist?.[item] || false
+                      }
+                      onChange={(e) =>
+                        updateProgress(
+                          currentDay,
+                          "checklist",
+                          item,
+                          e.target.checked
+                        )
+                      }
+                      className="mr-3 w-4 h-4"
+                    />
+                    <span className="truncate leading-relaxed">{item}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Family Circle */}
+            {/* <FamilyCircle /> */}
           </div>
-        </div>
 
-        {/* Goals Section */}
-        <div className="bg-white rounded-lg p-4 shadow-md">
-          <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center">
-            <Star className="mr-2" size={20} />
-            TODAY&apos;S GOALS & REFLECTION
-          </h3>
-          <textarea
-            placeholder="What are your intentions for today? How did you feel about your spiritual progress?"
-            value={getDayProgress(currentDay).goals || ""}
-            onChange={(e) =>
-              updateProgress(currentDay, "goals", null, e.target.value)
-            }
-            className="w-full p-3 border rounded-lg h-24 resize-none text-base"
-          />
-        </div>
-      </div>
-
-      {/* Bottom Navigation - Mobile Optimized */}
-      <div className="bg-white p-4 shadow-lg fixed bottom-0 left-0 right-0 border-t">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-start items-center space-x-2 overflow-x-auto pb-2">
-            {Array.from({ length: 30 }, (_, i) => i + 1).map((day: number) => (
-              <button
-                key={day}
-                onClick={() => setCurrentDay(day)}
-                className={`min-w-[44px] h-[44px] rounded-full text-sm font-medium transition-colors flex items-center justify-center ${
-                  day === currentDay
-                    ? "bg-blue-600 text-white"
-                    : progress[day]?.completedAt
-                    ? "bg-green-200 text-green-800"
-                    : day === 21 ||
-                      day === 23 ||
-                      day === 25 ||
-                      day === 27 ||
-                      day === 29
-                    ? "bg-yellow-200 text-yellow-800" // Odd nights in last 10 days
-                    : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                }`}
-              >
-                {day}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Modals - Mobile Optimized */}
-      {showPledge && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 mx-4">
-            <div className="text-center mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-blue-800 mb-2">
-                بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-              </h2>
-              <p className="text-sm text-gray-600">
-                IN THE NAME OF ALLAH, THE MOST GRACIOUS, THE MOST MERCIFUL
+          {/* Deed and Dua Section - Mobile Responsive */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
+            {/* Deed of the Day */}
+            <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-4 shadow-md">
+              <h3 className="text-lg font-semibold text-red-800 mb-3 flex items-center">
+                <Heart className="mr-2" size={20} />
+                Deed of the Day
+              </h3>
+              <p className="text-gray-700 mb-3 text-sm sm:text-base leading-relaxed">
+                {dayData.deedOfDay}
               </p>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={getDayProgress(currentDay).deedCompleted || false}
+                  onChange={(e) =>
+                    updateProgress(
+                      currentDay,
+                      "deedCompleted",
+                      null,
+                      e.target.checked
+                    )
+                  }
+                  className="mr-3 w-4 h-4"
+                />
+                <span className="text-sm font-medium">Completed</span>
+              </label>
             </div>
 
-            <h3 className="text-lg sm:text-xl font-bold text-blue-600 mb-4 text-center">
-              {ramadanData.pledge.title}
+            {/* Dua Section */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 shadow-md">
+              <h3 className="text-lg font-semibold text-blue-800 mb-3">
+                DU&apos;A OF PROPHET {dayData.dua.prophet}
+              </h3>
+              <div className="space-y-3">
+                <div className="text-right">
+                  <p className="text-base sm:text-lg arabic-text text-blue-900 leading-relaxed">
+                    {dayData.dua.arabic}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs italic text-gray-600 leading-relaxed">
+                    {dayData.dua.transliteration}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    &quot;{dayData.dua.translation}&quot;
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {dayData.dua.reference}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Goals Section */}
+          <div className="bg-white rounded-lg p-4 shadow-md">
+            <h3 className="text-lg font-semibold text-orange-800 mb-3 flex items-center">
+              <Star className="mr-2" size={20} />
+              TODAY&apos;S GOALS & REFLECTION
             </h3>
+            <textarea
+              placeholder="What are your intentions for today? How did you feel about your spiritual progress?"
+              value={getDayProgress(currentDay).goals || ""}
+              onChange={(e) =>
+                updateProgress(currentDay, "goals", null, e.target.value)
+              }
+              className="w-full p-3 border rounded-lg h-24 resize-none text-base"
+            />
+          </div>
+        </div>
 
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Enter your name"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                className="w-full p-3 border rounded-lg text-base"
-              />
-            </div>
-
-            <div className="text-gray-700 leading-relaxed mb-6 text-sm sm:text-base">
-              {ramadanData.pledge.content.replace(
-                "[your name]",
-                userName || "[your name]"
+        {/* Bottom Navigation - Mobile Optimized */}
+        <div className="bg-white p-4 shadow-lg fixed bottom-0 left-0 right-0 border-t">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex justify-start items-center space-x-2 overflow-x-auto pb-2">
+              {Array.from({ length: 30 }, (_, i) => i + 1).map(
+                (day: number) => (
+                  <button
+                    key={day}
+                    onClick={() => setCurrentDay(day)}
+                    className={`min-w-[44px] h-[44px] rounded-full text-sm font-medium transition-colors flex items-center justify-center ${
+                      day === currentDay
+                        ? "bg-blue-600 text-white"
+                        : progress[day]?.completedAt
+                        ? "bg-green-200 text-green-800"
+                        : day === 21 ||
+                          day === 23 ||
+                          day === 25 ||
+                          day === 27 ||
+                          day === 29
+                        ? "bg-yellow-200 text-yellow-800" // Odd nights in last 10 days
+                        : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                    }`}
+                  >
+                    {day}
+                  </button>
+                )
               )}
             </div>
-
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={() => setShowPledge(false)}
-                className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 min-h-[44px]"
-              >
-                Close
-              </button>
-            </div>
           </div>
         </div>
-      )}
 
-      <AchievementPopup />
-      <SurpriseModal />
+        {/* Modals - Mobile Optimized */}
+        {showPledge && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6 mx-4">
+              <div className="text-center mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-blue-800 mb-2">
+                  بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                </h2>
+                <p className="text-sm text-gray-600">
+                  IN THE NAME OF ALLAH, THE MOST GRACIOUS, THE MOST MERCIFUL
+                </p>
+              </div>
 
-      <style jsx>{`
-        .arabic-text {
-          font-family: "Amiri", "Times New Roman", serif;
-          line-height: 1.8;
-        }
+              <h3 className="text-lg sm:text-xl font-bold text-blue-600 mb-4 text-center">
+                {ramadanData.pledge.title}
+              </h3>
 
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-          background: #a8a8a8;
-        }
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Enter your name"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  className="w-full p-3 border rounded-lg text-base"
+                />
+              </div>
 
-        button {
-          cursor: pointer;
-        }
-      `}</style>
-    </div>
+              <div className="text-gray-700 leading-relaxed mb-6 text-sm sm:text-base">
+                {ramadanData.pledge.content.replace(
+                  "[your name]",
+                  userName || "[your name]"
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={() => setShowPledge(false)}
+                  className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 min-h-[44px]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <AchievementPopup />
+        <SurpriseModal />
+
+        <style jsx>{`
+          .arabic-text {
+            font-family: "Amiri", "Times New Roman", serif;
+            line-height: 1.8;
+          }
+
+          .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+          }
+
+          button {
+            cursor: pointer;
+          }
+        `}</style>
+      </div>
+    </>
   );
 };
 
